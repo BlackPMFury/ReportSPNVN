@@ -10,6 +10,6 @@ Like this: $this->congDiem($ten, +2);
 Just Use it with What are you likes and Anything with that.
 
 # With Error:
-In The Codes an plugin, We cannot Use true code... And If with a case Error Code like $ten or More, You must Contact With me now as Do a Issues In Here (Topic)
+with Codes in an plugin, We cannot Use true code... And If with a case Error Code like $ten or More, You must Contact With me now as Do a Issues In Here (Topic)
 
 Thanks, BlackPMFury
