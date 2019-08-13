@@ -1,0 +1,12 @@
+name: ReportSPN
+main: ReportUI\SPNVN\Main
+api:
+ - 3.0.0
+ - 3.2.0
+author: BlackPMFury
+version: 5.0
+description: "Report Without Console's Permission."
+commands:
+ tocao:
+  description: "Report"
+  default: true
