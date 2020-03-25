@@ -24,7 +24,7 @@ class Main extends PluginBase implements Listener{
 	
 	public function onEnable(){
 		$this->getServer()->getPluginManager()->registerEvents($this, $this);
-		$this->getServer()->getLogger()->info($this->tag . " §cReport§aSPN is Always Online.....");
+		$this->getServer()->getLogger()->info($this->tag . " Plugin Đã Được Bật");
 		$this->getLogger()->info("\n\n§c§l•§b R༶E༶P༶O༶R༶T༶S༶P༶N༶V༶N༶ §6Version §e5\n§c❤️ §aStarting Plugin By §cBlackPMFury\n\n");
 		$this->rp = new Config($this->getDataFolder() . "Report.yml", Config::YAML, []);
 		$this->cr = new Config($this->getDataFolder() ."Cancel-Report.yml", Config::YAML, []);
@@ -46,7 +46,9 @@ class Main extends PluginBase implements Listener{
 		}else{
 			$player->sendMessage($this->report . "§e You do not have Any Report, G'Day!");
 		}
-        $player->sendMessage($msg);
+		if($this->user->exists($ten)){
+            $player->sendMessage($msg);
+		}
 		if(!$this->kiemTra($ten)) {
             $this->taoNguoiDung($ten);
         }
@@ -92,6 +94,14 @@ class Main extends PluginBase implements Listener{
 		}
 		return false;
 	}
+	
+	public function getReport(){
+		return $this->rp->getAll(true);
+	}
+	
+	public function getScamer(){
+		return $this->scam->getAll(true);
+	}
 		
 	public function onCommand(CommandSender $sender, Command $cmd, string $label, array $args): bool{
 		switch(strtolower($cmd->getName())){
@@ -121,9 +131,9 @@ class Main extends PluginBase implements Listener{
 			});
 			
 			$form->setTitle("§6>> ".$this->report."§6 <<");
-			$form->addButton("§cEXIT", 0);
-			$form->addButton("§6>>§a Tố Cáo §6<<", 1);
-			$form->addButton("§6>>§a Report Manager §6<<", 2);
+			$form->addButton("§l§6•§c THOÁT §6•", 0);
+			$form->addButton("§l§f•§e Tố Cáo §f•", 1);
+			$form->addButton("§l§f•§e Check Report§f •", 2);
 			$form->sendToPlayer($sender);
 		}
 		return true;
@@ -155,7 +165,7 @@ class Main extends PluginBase implements Listener{
 			$sender->sendMessage($this->report . "§a Tố Cáo§c ".$data[1]."§a Thành Công!");
 			$this->getServer()->getLogger()->info($this->report . "§l§a Trường Hợp §c".$reason."§a Của §c".$data[1]."§a Bị báo Cáo Bởi§e ". $sender->getName());
 			$sender->sendMessage($this->tag . "§l§a Đợi Owner Xét Duyệt!");
-			$this->getServer()->dispatchCommand(new ConsoleCommandSender(), "tell ".strtolower($data[1])." §eYou Have Report From§a ".$sender->getName()."§e With Reason §c".$reason."§c \ §aOther Reason:". $data[3]);
+			$this->getServer()->dispatchCommand(new ConsoleCommandSender(), "tell ".strtolower($data[1])." §eYou Have Report From§a ".$sender->getName()."§e With Reason §c".$reason."§c \ §aOther Reason: ". $data[3]);
 			if(!(isset($data[3]))){
 				$sender->sendMessage("§c•[1] §aĐiền Rõ Lỹ Do Tuỳ Chọn Nếu Có!");
 				return true;
@@ -192,7 +202,7 @@ class Main extends PluginBase implements Listener{
 				break;
 			}
 		});
-		$form->setTitle("§6>> §c<=> §aManager Report §c<=> §6<<");
+		$form->setTitle("§l§f•§e Check Report§f •");
 		$form->addButton("§c Huỷ Tố Cáo", 0);
 		$form->addButton("§c Manager Report", 1);
 		$form->sendToPlayer($sender);
@@ -225,6 +235,10 @@ class Main extends PluginBase implements Listener{
 		$ten = $name["Tên"];
 		$reason = $name["Lý Do"];
 		$other = $name["Lý Do Khác"];
+		$scam = $this->scam->get($sender->getName());
+		$scamer = $scam["Người Bị kiện"];
+		$lostItem = $scam["Bạn bị mất những gì"];
+		$time = $scam["Time"];
 		$api = $this->getServer()->getPluginManager()->getPlugin("FormAPI");
 		$form = $api->createCustomForm(Function (Player $sender, $data){
 			foreach($this->getServer()->getOnlinePlayers() as $players){
@@ -242,6 +256,11 @@ class Main extends PluginBase implements Listener{
 		$form->addLabel("§eTên Người bị Tố Cáo:§c ". $ten);
 		$form->addLabel("§eLý Do: §c". $reason);
 		$form->addLabel("§eLý Do khác (Nếu Có):§c ". $other);
+		$form->addLabel("§a<>============================<>");
+		$form->addLabel("§l§aReport §6#2: Scam");
+		$form->addLabel("§l§aTên Người Bị tố cáo: " . $scamer);
+		$form->addLabel("§l§c Mất Những gì: " . $lostItem);
+		$form->addLabel("§l§a Time : " . $time);
 		$form->sendToPlayer($sender);
 	}
 	
@@ -276,11 +295,24 @@ class Main extends PluginBase implements Listener{
         });
 	    $form->setTitle("§a-==• §e>>§a Tố Cáo§e << §a•==-");
 	    $form->addLabel("§c=> §aĐăng Bằng Chứng Và kèm theo Thời gian tố cáo [/tocao] lên fanpage");
-	    $form->addInput("§aTên người bị kiện:");
-	    $form->addInput("§aMất những gì");
-	    $form->addInput("§aThời Gian bị scam:");
+	    $form->addInput("§aTên người bị kiện: ");
+	    $form->addInput("§aMất những gì: ");
+	    $form->addInput("§aThời Gian bị scam: ");
 	    $form->sendToPlayer($sender);
     }
+	
+	public function HistoryReporter($sender){
+		$reportHis = implode("\n ", $this->getReport());
+		$scamHis = implode("\n ", $this->getScamer());
+		$a = $this->getServer()->getPluginManager()->getPlugin("FormAPI");
+		$f = $a->createCustomForm(Function (Player $sender, $data){
+			$sender->sendMessage("");
+		});
+		$f->setTitle("§l§c<•> Top §aHistory §c<•>");
+		$f->addLabel("§l§f•§a Top Report Nhiều Gần Đây: §c\n" . $reportHis);
+		$f->addLabel("§l§f•§a Lịch Sử Báo Cáo Scam Gần đây: §c\n" . $scamHis);
+		$f->sendToPlayer($sender);
+	}
 
     public function menu($sender){
 	    $api = $this->getServer()->getPluginManager()->getPlugin("FormAPI");
@@ -295,7 +327,10 @@ class Main extends PluginBase implements Listener{
                 case 1:
                     $this->specReport($sender);
                     break;
-                case 2:
+				case 2:
+				    $this->HistoryReporter($sender);
+					break;
+                case 3:
                     $sender->sendMessage($this->tag . " §cEXIT!");
                     break;
             }
@@ -303,7 +338,8 @@ class Main extends PluginBase implements Listener{
 	    $form->setTitle("§a-==• §e>>§a Tố Cáo§e << §a•==-");
 	    $form->addButton("§a-==• §c>>§a Tố Cáo Vấn Đề §c<<§a •==-", 0);
 	    $form->addButton("§a-==• §c>>§a Tố Cáo Lừa đảo (Scam) §c<<§a •==-", 1);
-	    $form->addButton("§cEXIT!");
+		$form->addButton("§l§f•§e Top Tố Cáo Gần Đây§f•", 2);
+	    $form->addButton("§cEXIT!", 3);
 	    $form->sendToPlayer($sender);
     }
 }
